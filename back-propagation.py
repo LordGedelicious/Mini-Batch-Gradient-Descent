@@ -1,16 +1,22 @@
 import numpy as np
+import math
 
+# Error
 def error (output, target):
     return 0.5 * (target - output) ** 2
 
+def error_softmax(prob):
+    return -math.log(prob)
+
+# Partial Derivative
 def dE_dOut(output, target):
     return - (target - output)
 
+def dE_dOut_softmax(output):
+    pass
+
 def dNet_dW(inputs, index):
     return inputs[index]
-
-def back_propagation(model_src_name):
-    pass
 
 # Activation functions
 def linear(arr):
@@ -33,22 +39,21 @@ def softmax(arr):
     sum_arr = np.sum(arr)
     return arr/sum_arr
 
-# Derivative versions for activation functions
-# Derivative of linear activation function is simply 1
 def linear_derivative(arr):
     return np.ones_like(arr)
 
-# Derivative of ReLU activation function
 def relu_derivative(arr):
     return np.where(arr > 0, 1, 0)
 
-# Derivative of sigmoid activation function
 def sigmoid_derivative(arr):
     sigmoid_output = sigmoid(arr)
     return sigmoid_output * (1 - sigmoid_output)
 
-# Derivative of softmax activation function
 def softmax_derivative(arr):
     softmax_output = softmax(arr)
     jacobian_matrix = np.diag(softmax_output) - np.outer(softmax_output, softmax_output)
     return jacobian_matrix
+
+def back_propagation(model_src_name):
+    pass
+
