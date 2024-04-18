@@ -12,8 +12,8 @@ def error_softmax(prob):
 def dE_dOut(output, target):
     return - (target - output)
 
-def dE_dOut_softmax(output):
-    pass
+def dE_dOut_softmax(prob):
+    return softmax_derivative(prob)
 
 def dNet_dW(inputs, index):
     return inputs[index]
@@ -44,7 +44,7 @@ def linear_derivative(arr):
     return np.ones_like(arr)
 
 def relu_derivative(arr):
-    return np.where(arr > 0, 1, 0)
+    return np.where(arr >= 0, 1, 0)
 
 def sigmoid_derivative(arr):
     sigmoid_output = sigmoid(arr)
@@ -100,6 +100,4 @@ def back_propagation(model):
     for i, hidden_layer in enumerate(model.hidden_layer):
         for j, weight in enumerate(hidden_layer.weight):
             hidden_layer.weight[j] = weight - model.learning_rate * hidden_error[i] * dNet_dW(hidden_layer.input, j)
-
-
 
