@@ -74,7 +74,9 @@ class ActivationFunctions:
     
     @staticmethod
     def softmax(x, derivative=False):
-        return np.exp(x) / np.sum(np.exp(x), axis=1, keepdims=True)
+        if derivative:
+            return x * (1 - x)
+        return np.exp(x) / np.sum(np.exp(x), axis=0, keepdims=True)
 
 class NN:
     def __init__(self, model_config, initial_weights):
@@ -116,6 +118,7 @@ class NN:
                 deltas = [None] * len(self.layers)
 
                 for x, t in zip(batch_input, batch_target):
+                    delta = 0
                     output = self.forward_propagation(x)
                     
                     # Compute error
@@ -123,21 +126,23 @@ class NN:
                     batch_error += np.sum(error ** 2 / 2)
 
                     # Backpropagation
-                    # delta = - error * f'(output)
                     delta = - error 
 
-                    # Output layer
                     for idx, layer in enumerate(self.layers[::-1]):
                         activation = getattr(ActivationFunctions, layer['activation_function'])
+                        error = -1 * np.log(output) if activation == "softmax" else error
                         delta_output = delta * activation(output, derivative=True)
                         dw = np.append(self.bias, x)
                         delta_output = learning_rate * np.outer(delta_output, dw)
+
+                        if idx > 0 and deltas[-idx] is not None:
+                            delta_output = np.dot(self.weights[-idx][ 1:].T, deltas[-idx]) 
+
                         if deltas[-idx-1] is None:
                             deltas[-idx-1] = delta_output
                         else:
                             deltas[-idx-1] += delta_output
 
-                        delta = np.dot(self.weights[-idx-1][:, 1:].T, delta_output.T)
                         
                 total_error += batch_error
 
@@ -158,7 +163,7 @@ class NN:
 
 
 if __name__ == "__main__":
-    file_path = os.path.join(os.path.dirname(__file__), 'testcase', 'linear.json')
+    file_path = os.path.join(os.path.dirname(__file__), 'testcase', 'softmax_two_layer.json')
 
     try:
         case, expect = parse_json_file(file_path)
